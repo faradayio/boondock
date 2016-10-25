@@ -4,6 +4,10 @@
 
 This is a Docker Remote API binding in Rust. Documentation is available [here](https://ghmlee.github.io/rust-docker/doc/docker).
 
+## Fork
+
+`boondock` is a fork of https://github.com/ghmlee/rust-docker. Thanks to all the original contributors!
+
 ## Quick start
 
 ```
