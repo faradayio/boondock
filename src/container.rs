@@ -1,6 +1,4 @@
-use rustc_serialize::json;
 use std;
-use std::error::Error;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, RustcEncodable, RustcDecodable)]
