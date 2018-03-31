@@ -1,6 +1,5 @@
 extern crate hyper;
 
-use std;
 use std::iter;
 use std::io::{BufRead, BufReader};
 use hyper::client::response::Response;

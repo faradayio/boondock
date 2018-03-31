@@ -1,10 +1,7 @@
-use std;
-use std::collections::BTreeMap;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::io::{self, Read};
-use hyper;
+use std::io::Read;
 use hyper::Client;
 use hyper::client::RequestBuilder;
 use hyper::client::pool::{Config, Pool};
@@ -159,7 +156,7 @@ impl Docker {
     }
 
     #[cfg(not(feature="openssl"))]
-    pub fn connect_with_ssl(addr: &str, ssl_key: &Path, ssl_cert: &Path, ssl_ca: &Path) -> Result<Docker> {
+    pub fn connect_with_ssl(_addr: &str, _ssl_key: &Path, _ssl_cert: &Path, _ssl_ca: &Path) -> Result<Docker> {
         Err(ErrorKind::SslDisabled.into())
     }
 
