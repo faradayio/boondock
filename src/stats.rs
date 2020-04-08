@@ -1,13 +1,13 @@
 extern crate hyper;
 
 use hyper::client::response::Response;
-use std;
+
 use std::io::{BufRead, BufReader};
 use std::iter;
 
 use serde_json;
 
-use errors::*;
+use crate::errors::*;
 
 pub struct StatsReader {
     buf: BufReader<Response>,

@@ -1,7 +1,7 @@
 #[cfg(test)]
-use container::{Container, ContainerInfo};
+use crate::container::{Container, ContainerInfo};
 #[cfg(test)]
-use filesystem::FilesystemChange;
+use crate::filesystem::FilesystemChange;
 #[cfg(test)]
 use hyper::client::response::Response;
 #[cfg(test)]
@@ -9,21 +9,21 @@ use hyper::http::h1::{Http11Message, HttpWriter};
 #[cfg(test)]
 use hyper::Url;
 #[cfg(test)]
-use image::Image;
+use crate::image::Image;
 #[cfg(test)]
-use process::Top;
+use crate::process::Top;
 #[cfg(test)]
 use serde_json;
 #[cfg(test)]
-use stats::{Stats, StatsReader};
+use crate::stats::{Stats, StatsReader};
 #[cfg(test)]
 use std::io::Write;
 #[cfg(test)]
-use system::SystemInfo;
+use crate::system::SystemInfo;
 #[cfg(test)]
-use util::MemoryStream;
+use crate::util::MemoryStream;
 #[cfg(test)]
-use version::Version;
+use crate::version::Version;
 
 #[test]
 #[cfg(test)]

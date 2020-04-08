@@ -36,5 +36,5 @@ mod util;
 pub mod version;
 
 // publicly re-export
-pub use docker::Docker;
-pub use options::*;
+pub use crate::docker::Docker;
+pub use crate::options::*;

@@ -1,4 +1,4 @@
-use hyper;
+
 use hyper::client::pool::{Config, Pool};
 use hyper::client::response::Response;
 use hyper::client::RequestBuilder;
@@ -7,29 +7,29 @@ use hyper::net::HttpConnector;
 use hyper::net::{HttpsConnector, Openssl};
 use hyper::Client;
 #[cfg(feature = "openssl")]
-use openssl::ssl::error::SslError;
+
 #[cfg(feature = "openssl")]
 use openssl::ssl::{SslContext, SslMethod};
 #[cfg(feature = "openssl")]
 use openssl::x509::X509FileType;
-use std;
-use std::collections::BTreeMap;
+
+
 use std::env;
-use std::io::{self, Read};
+use std::io::{Read};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 #[cfg(unix)]
-use unix::HttpUnixConnector;
+use crate::unix::HttpUnixConnector;
 
-use container::{Container, ContainerInfo};
-use errors::*;
-use filesystem::FilesystemChange;
-use image::{Image, ImageStatus};
-use options::*;
-use process::{Process, Top};
-use stats::StatsReader;
-use system::SystemInfo;
-use version::Version;
+use crate::container::{Container, ContainerInfo};
+use crate::errors::*;
+use crate::filesystem::FilesystemChange;
+use crate::image::{Image, ImageStatus};
+use crate::options::*;
+use crate::process::{Process, Top};
+use crate::stats::StatsReader;
+use crate::system::SystemInfo;
+use crate::version::Version;
 
 use serde::de::DeserializeOwned;
 use serde_json;
@@ -53,7 +53,7 @@ pub fn default_cert_path() -> Result<PathBuf> {
     if let Ok(ref path) = from_env {
         Ok(Path::new(path).to_owned())
     } else {
-        let home = try!(env::home_dir().ok_or_else(|| ErrorKind::NoCertPath));
+        let home = r#try!(env::home_dir().ok_or_else(|| ErrorKind::NoCertPath));
         Ok(home.join(".docker"))
     }
 }
@@ -79,7 +79,7 @@ impl Docker {
         // Read in our configuration from the Docker environment.
         let host = env::var("DOCKER_HOST").unwrap_or(DEFAULT_DOCKER_HOST.to_string());
         let tls_verify = env::var("DOCKER_TLS_VERIFY").is_ok();
-        let cert_path = try!(default_cert_path());
+        let cert_path = r#try!(default_cert_path());
 
         // Dispatch to the correct connection function.
         let mkerr = || ErrorKind::CouldNotConnect(host.clone());
@@ -142,12 +142,12 @@ impl Docker {
         let client_addr = addr.clone().replace("tcp://", "https://");
 
         let mkerr = || ErrorKind::SslError(addr.to_owned());
-        let mut ssl_context = try!(SslContext::new(SslMethod::Sslv23).chain_err(&mkerr));
-        try!(ssl_context.set_CA_file(ssl_ca).chain_err(&mkerr));
-        try!(ssl_context
+        let mut ssl_context = r#try!(SslContext::new(SslMethod::Sslv23).chain_err(&mkerr));
+        r#try!(ssl_context.set_CA_file(ssl_ca).chain_err(&mkerr));
+        r#try!(ssl_context
             .set_certificate_file(ssl_cert, X509FileType::PEM)
             .chain_err(&mkerr));
-        try!(ssl_context
+        r#try!(ssl_context
             .set_private_key_file(ssl_key, X509FileType::PEM)
             .chain_err(&mkerr));
 
@@ -222,16 +222,16 @@ impl Docker {
     }
 
     fn execute_request(&self, request: RequestBuilder) -> Result<String> {
-        let mut response = try!(request.send());
+        let mut response = r#try!(request.send());
         assert!(response.status.is_success());
 
         let mut body = String::new();
-        try!(response.read_to_string(&mut body));
+        r#try!(response.read_to_string(&mut body));
         Ok(body)
     }
 
     fn start_request(&self, request: RequestBuilder) -> Result<Response> {
-        let response = try!(request.send());
+        let response = r#try!(request.send());
         assert!(response.status.is_success());
         Ok(response)
     }
@@ -248,9 +248,9 @@ impl Docker {
     {
         let request_url = self.get_url(url);
         let request = self.build_get_request(&request_url);
-        let body = try!(self.execute_request(request));
+        let body = r#try!(self.execute_request(request));
         let info =
-            try!(serde_json::from_str::<T>(&body)
+            r#try!(serde_json::from_str::<T>(&body)
                 .chain_err(|| ErrorKind::ParseError(type_name, body)));
         Ok(info)
     }
@@ -262,7 +262,7 @@ impl Docker {
 
     pub fn processes(&self, container: &Container) -> Result<Vec<Process>> {
         let url = format!("/containers/{}/top", container.Id);
-        let top: Top = try!(self.decode_url("Top", &url));
+        let top: Top = r#try!(self.decode_url("Top", &url));
 
         let mut processes: Vec<Process> = Vec::new();
         let mut process_iter = top.Processes.iter();
@@ -331,16 +331,16 @@ impl Docker {
 
         let request_url = self.get_url(&format!("/containers/{}/stats", container.Id));
         let request = self.build_get_request(&request_url);
-        let response = try!(self.start_request(request));
+        let response = r#try!(self.start_request(request));
         Ok(StatsReader::new(response))
     }
 
     pub fn create_image(&self, image: String, tag: String) -> Result<Vec<ImageStatus>> {
         let request_url = self.get_url(&format!("/images/create?fromImage={}&tag={}", image, tag));
         let request = self.build_post_request(&request_url);
-        let body = try!(self.execute_request(request));
+        let body = r#try!(self.execute_request(request));
         let fixed = self.arrayify(&body);
-        let statuses = try!(serde_json::from_str::<Vec<ImageStatus>>(&fixed)
+        let statuses = r#try!(serde_json::from_str::<Vec<ImageStatus>>(&fixed)
             .chain_err(|| ErrorKind::ParseError("ImageStatus", fixed)));
         Ok(statuses)
     }
@@ -373,14 +373,14 @@ impl Docker {
         let url = format!("/containers/{}/export", container.Id);
         let request_url = self.get_url(&url);
         let request = self.build_get_request(&request_url);
-        let response = try!(self.start_request(request));
+        let response = r#try!(self.start_request(request));
         Ok(response)
     }
 
     pub fn ping(&self) -> Result<String> {
         let request_url = self.get_url(&format!("/_ping"));
         let request = self.build_get_request(&request_url);
-        let body = try!(self.execute_request(request));
+        let body = r#try!(self.execute_request(request));
         Ok(body)
     }
 

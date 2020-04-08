@@ -1,5 +1,5 @@
 use hyper::net::NetworkStream;
-use std;
+
 use std::io::{Read, Result, Write};
 use std::net::{Shutdown, SocketAddr};
 use std::time::Duration;
@@ -26,7 +26,7 @@ impl MemoryStream {
 impl Read for MemoryStream {
     fn read(&mut self, mut buf: &mut [u8]) -> Result<usize> {
         let (_, to_write) = self.buf.split_at(self.pos);
-        let n = try!(buf.write(to_write));
+        let n = r#try!(buf.write(to_write));
         self.pos = self.pos + n;
         Ok(n)
     }
