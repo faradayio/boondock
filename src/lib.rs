@@ -6,18 +6,16 @@
 // import external libraries
 #[macro_use]
 extern crate error_chain;
-extern crate hyper;
+
 #[cfg(windows)]
 extern crate named_pipe;
-#[cfg(feature = "openssl")]
-extern crate openssl;
-#[cfg(unix)]
-extern crate unix_socket;
+
+
 #[macro_use]
 extern crate serde_derive;
-extern crate serde;
-extern crate serde_json;
-extern crate url;
+
+
+
 
 // declare modules
 pub mod container;

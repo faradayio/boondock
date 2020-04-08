@@ -1,4 +1,4 @@
-extern crate boondock;
+
 
 use boondock::errors::*;
 use boondock::{ContainerListOptions, Docker};

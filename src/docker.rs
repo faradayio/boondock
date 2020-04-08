@@ -213,15 +213,15 @@ impl Docker {
         base
     }
 
-    fn build_get_request(&self, request_url: &str) -> RequestBuilder {
+    fn build_get_request(&self, request_url: &str) -> RequestBuilder<'_> {
         self.client.get(request_url)
     }
 
-    fn build_post_request(&self, request_url: &str) -> RequestBuilder {
+    fn build_post_request(&self, request_url: &str) -> RequestBuilder<'_> {
         self.client.post(request_url)
     }
 
-    fn execute_request(&self, request: RequestBuilder) -> Result<String> {
+    fn execute_request(&self, request: RequestBuilder<'_>) -> Result<String> {
         let mut response = r#try!(request.send());
         assert!(response.status.is_success());
 
@@ -230,7 +230,7 @@ impl Docker {
         Ok(body)
     }
 
-    fn start_request(&self, request: RequestBuilder) -> Result<Response> {
+    fn start_request(&self, request: RequestBuilder<'_>) -> Result<Response> {
         let response = r#try!(request.send());
         assert!(response.status.is_success());
         Ok(response)

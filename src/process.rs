@@ -24,7 +24,7 @@ pub struct Top {
 }
 
 impl Display for Process {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         let mut s = String::new();
 
         s.push_str(&*self.user.clone());

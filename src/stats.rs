@@ -1,4 +1,4 @@
-extern crate hyper;
+use hyper;
 
 use hyper::client::response::Response;
 

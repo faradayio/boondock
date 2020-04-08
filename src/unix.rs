@@ -18,7 +18,7 @@ impl Clone for HttpUnixStream {
 }
 
 impl fmt::Debug for HttpUnixStream {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("HttpUnixStream(_)")
     }
 }
