@@ -5,6 +5,8 @@ version = "0.0.50"
 authors = ["Graham Lee <ghmlee@ghmlee.com>",
            "Toby Lawrence <toby@nuclearfurnace.com>",
            "Eric Kidd <git@randomhacks.net>"]
+edition = "2018"
+
 license = "Apache-2.0"
 homepage = "https://github.com/faradayio/boondock"
 repository = "https://github.com/faradayio/boondock"
