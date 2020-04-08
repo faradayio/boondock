@@ -1,34 +1,34 @@
+use hyper;
+use hyper::client::pool::{Config, Pool};
+use hyper::client::response::Response;
+use hyper::client::RequestBuilder;
+use hyper::net::HttpConnector;
+#[cfg(feature = "openssl")]
+use hyper::net::{HttpsConnector, Openssl};
+use hyper::Client;
+#[cfg(feature = "openssl")]
+use openssl::ssl::error::SslError;
+#[cfg(feature = "openssl")]
+use openssl::ssl::{SslContext, SslMethod};
+#[cfg(feature = "openssl")]
+use openssl::x509::X509FileType;
 use std;
 use std::collections::BTreeMap;
 use std::env;
+use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::io::{self, Read};
-use hyper;
-use hyper::Client;
-use hyper::client::RequestBuilder;
-use hyper::client::pool::{Config, Pool};
-use hyper::client::response::Response;
-use hyper::net::HttpConnector;
-#[cfg(feature="openssl")]
-use hyper::net::{HttpsConnector, Openssl};
-#[cfg(feature="openssl")]
-use openssl::ssl::{SslContext, SslMethod};
-#[cfg(feature="openssl")]
-use openssl::ssl::error::SslError;
-#[cfg(feature="openssl")]
-use openssl::x509::X509FileType;
 #[cfg(unix)]
 use unix::HttpUnixConnector;
 
-use errors::*;
 use container::{Container, ContainerInfo};
+use errors::*;
+use filesystem::FilesystemChange;
+use image::{Image, ImageStatus};
 use options::*;
 use process::{Process, Top};
 use stats::StatsReader;
 use system::SystemInfo;
-use image::{Image, ImageStatus};
-use filesystem::FilesystemChange;
 use version::Version;
 
 use serde::de::DeserializeOwned;
@@ -49,13 +49,11 @@ pub const DEFAULT_DOCKER_HOST: &'static str = "tcp://localhost:2375";
 /// The default directory in which to look for our Docker certificate
 /// files.
 pub fn default_cert_path() -> Result<PathBuf> {
-    let from_env = env::var("DOCKER_CERT_PATH")
-        .or_else(|_| env::var("DOCKER_CONFIG"));
+    let from_env = env::var("DOCKER_CERT_PATH").or_else(|_| env::var("DOCKER_CONFIG"));
     if let Ok(ref path) = from_env {
         Ok(Path::new(path).to_owned())
     } else {
-        let home = try!(env::home_dir()
-            .ok_or_else(|| ErrorKind::NoCertPath));
+        let home = try!(env::home_dir().ok_or_else(|| ErrorKind::NoCertPath));
         Ok(home.join(".docker"))
     }
 }
@@ -79,8 +77,7 @@ impl Docker {
     /// possible.
     pub fn connect_with_defaults() -> Result<Docker> {
         // Read in our configuration from the Docker environment.
-        let host = env::var("DOCKER_HOST")
-            .unwrap_or(DEFAULT_DOCKER_HOST.to_string());
+        let host = env::var("DOCKER_HOST").unwrap_or(DEFAULT_DOCKER_HOST.to_string());
         let tls_verify = env::var("DOCKER_TLS_VERIFY").is_ok();
         let cert_path = try!(default_cert_path());
 
@@ -90,11 +87,13 @@ impl Docker {
             Docker::connect_with_unix(&host).chain_err(&mkerr)
         } else if host.starts_with("tcp://") {
             if tls_verify {
-                Docker::connect_with_ssl(&host,
-                                         &cert_path.join("key.pem"),
-                                         &cert_path.join("cert.pem"),
-                                         &cert_path.join("ca.pem"))
-                    .chain_err(&mkerr)
+                Docker::connect_with_ssl(
+                    &host,
+                    &cert_path.join("key.pem"),
+                    &cert_path.join("cert.pem"),
+                    &cert_path.join("ca.pem"),
+                )
+                .chain_err(&mkerr)
             } else {
                 Docker::connect_with_http(&host).chain_err(&mkerr)
             }
@@ -118,7 +117,11 @@ impl Docker {
         let connection_pool = Pool::with_connector(connection_pool_config, http_unix_connector);
 
         let client = Client::with_connector(connection_pool);
-        let docker = Docker { client: client, client_type: ClientType::Unix, client_addr: client_addr };
+        let docker = Docker {
+            client: client,
+            client_type: ClientType::Unix,
+            client_addr: client_addr,
+        };
 
         return Ok(docker);
     }
@@ -128,21 +131,29 @@ impl Docker {
         Err(ErrorKind::UnsupportedScheme(addr.to_owned()).into())
     }
 
-    #[cfg(feature="openssl")]
-    pub fn connect_with_ssl(addr: &str, ssl_key: &Path, ssl_cert: &Path, ssl_ca: &Path) -> Result<Docker> {
+    #[cfg(feature = "openssl")]
+    pub fn connect_with_ssl(
+        addr: &str,
+        ssl_key: &Path,
+        ssl_cert: &Path,
+        ssl_ca: &Path,
+    ) -> Result<Docker> {
         // This ensures that using docker-machine-esque addresses work with Hyper.
         let client_addr = addr.clone().replace("tcp://", "https://");
 
         let mkerr = || ErrorKind::SslError(addr.to_owned());
-        let mut ssl_context = try!(SslContext::new(SslMethod::Sslv23)
-            .chain_err(&mkerr));
+        let mut ssl_context = try!(SslContext::new(SslMethod::Sslv23).chain_err(&mkerr));
         try!(ssl_context.set_CA_file(ssl_ca).chain_err(&mkerr));
-        try!(ssl_context.set_certificate_file(ssl_cert, X509FileType::PEM)
+        try!(ssl_context
+            .set_certificate_file(ssl_cert, X509FileType::PEM)
             .chain_err(&mkerr));
-        try!(ssl_context.set_private_key_file(ssl_key, X509FileType::PEM)
+        try!(ssl_context
+            .set_private_key_file(ssl_key, X509FileType::PEM)
             .chain_err(&mkerr));
 
-        let hyper_ssl_context = Openssl { context: Arc::new(ssl_context) };
+        let hyper_ssl_context = Openssl {
+            context: Arc::new(ssl_context),
+        };
         let https_connector = HttpsConnector::new(hyper_ssl_context);
         let connection_pool_config = Config { max_idle: 8 };
         let connection_pool = Pool::with_connector(connection_pool_config, https_connector);
@@ -150,16 +161,20 @@ impl Docker {
         let client = Client::with_connector(connection_pool);
         let docker = Docker {
             client: client,
-            client_type:
-            ClientType::Tcp,
+            client_type: ClientType::Tcp,
             client_addr: client_addr.to_owned(),
         };
 
         return Ok(docker);
     }
 
-    #[cfg(not(feature="openssl"))]
-    pub fn connect_with_ssl(addr: &str, ssl_key: &Path, ssl_cert: &Path, ssl_ca: &Path) -> Result<Docker> {
+    #[cfg(not(feature = "openssl"))]
+    pub fn connect_with_ssl(
+        addr: &str,
+        ssl_key: &Path,
+        ssl_cert: &Path,
+        ssl_ca: &Path,
+    ) -> Result<Docker> {
         Err(ErrorKind::SslDisabled.into())
     }
 
@@ -174,10 +189,13 @@ impl Docker {
         let connection_pool = Pool::with_connector(connection_pool_config, http_connector);
 
         let client = Client::with_connector(connection_pool);
-        let docker = Docker { client: client, client_type: ClientType::Tcp, client_addr: client_addr };
+        let docker = Docker {
+            client: client,
+            client_type: ClientType::Tcp,
+            client_addr: client_addr,
+        };
 
         return Ok(docker);
-
     }
 
     fn get_url(&self, path: &str) -> String {
@@ -225,18 +243,19 @@ impl Docker {
 
     /// `GET` a URL and decode it.
     fn decode_url<T>(&self, type_name: &'static str, url: &str) -> Result<T>
-        where T: DeserializeOwned<>
+    where
+        T: DeserializeOwned,
     {
         let request_url = self.get_url(url);
         let request = self.build_get_request(&request_url);
         let body = try!(self.execute_request(request));
-        let info = try!(serde_json::from_str::<T>(&body)
-            .chain_err(|| ErrorKind::ParseError(type_name, body)));
+        let info =
+            try!(serde_json::from_str::<T>(&body)
+                .chain_err(|| ErrorKind::ParseError(type_name, body)));
         Ok(info)
     }
 
-    pub fn containers(&self, opts: ContainerListOptions)
-                      -> Result<Vec<Container>> {
+    pub fn containers(&self, opts: ContainerListOptions) -> Result<Vec<Container>> {
         let url = format!("/containers/json?{}", opts.to_url_params());
         self.decode_url("Container", &url)
     }
@@ -250,10 +269,12 @@ impl Docker {
         loop {
             let process = match process_iter.next() {
                 Some(process) => process,
-                None => { break; }
+                None => {
+                    break;
+                }
             };
 
-            let mut p = Process{
+            let mut p = Process {
                 user: String::new(),
                 pid: String::new(),
                 cpu: None,
@@ -264,7 +285,7 @@ impl Docker {
                 stat: None,
                 start: None,
                 time: None,
-                command: String::new()
+                command: String::new(),
             };
 
             let mut value_iter = process.iter();
@@ -272,24 +293,26 @@ impl Docker {
             loop {
                 let value = match value_iter.next() {
                     Some(value) => value,
-                    None => { break; }
+                    None => {
+                        break;
+                    }
                 };
                 let key = &top.Titles[i];
                 match key.as_ref() {
-                    "UID" => { p.user = value.clone() },
-                    "USER" => {p.user = value.clone() },
-                    "PID" => { p.pid = value.clone() },
-                    "%CPU" => { p.cpu = Some(value.clone()) },
-                    "%MEM" => { p.memory = Some(value.clone()) },
-                    "VSZ" => { p.vsz = Some(value.clone()) },
-                    "RSS" => { p.rss = Some(value.clone()) },
-                    "TTY" => { p.tty = Some(value.clone()) },
-                    "STAT" => { p.stat = Some(value.clone()) },
-                    "START" => { p.start = Some(value.clone()) },
-                    "STIME" => { p.start = Some(value.clone()) },
-                    "TIME" => { p.time = Some(value.clone()) },
-                    "CMD" => { p.command = value.clone() },
-                    "COMMAND" => { p.command = value.clone() },
+                    "UID" => p.user = value.clone(),
+                    "USER" => p.user = value.clone(),
+                    "PID" => p.pid = value.clone(),
+                    "%CPU" => p.cpu = Some(value.clone()),
+                    "%MEM" => p.memory = Some(value.clone()),
+                    "VSZ" => p.vsz = Some(value.clone()),
+                    "RSS" => p.rss = Some(value.clone()),
+                    "TTY" => p.tty = Some(value.clone()),
+                    "STAT" => p.stat = Some(value.clone()),
+                    "START" => p.start = Some(value.clone()),
+                    "STIME" => p.start = Some(value.clone()),
+                    "TIME" => p.time = Some(value.clone()),
+                    "CMD" => p.command = value.clone(),
+                    "COMMAND" => p.command = value.clone(),
                     _ => {}
                 }
 
@@ -325,7 +348,7 @@ impl Docker {
     pub fn images(&self, all: bool) -> Result<Vec<Image>> {
         let a = match all {
             true => "1",
-            false => "0"
+            false => "0",
         };
         let url = format!("/images/json?a={}", a);
         self.decode_url("Image", &url)

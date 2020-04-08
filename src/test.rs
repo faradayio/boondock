@@ -1,29 +1,29 @@
 #[cfg(test)]
-use serde_json;
-#[cfg(test)]
 use container::{Container, ContainerInfo};
-#[cfg(test)]
-use process::{Top};
-#[cfg(test)]
-use stats::{Stats, StatsReader};
-#[cfg(test)]
-use system::SystemInfo;
-#[cfg(test)]
-use image::Image;
 #[cfg(test)]
 use filesystem::FilesystemChange;
 #[cfg(test)]
-use version::Version;
-#[cfg(test)]
 use hyper::client::response::Response;
-#[cfg(test)]
-use util::MemoryStream;
-#[cfg(test)]
-use hyper::Url;
 #[cfg(test)]
 use hyper::http::h1::{Http11Message, HttpWriter};
 #[cfg(test)]
+use hyper::Url;
+#[cfg(test)]
+use image::Image;
+#[cfg(test)]
+use process::Top;
+#[cfg(test)]
+use serde_json;
+#[cfg(test)]
+use stats::{Stats, StatsReader};
+#[cfg(test)]
 use std::io::Write;
+#[cfg(test)]
+use system::SystemInfo;
+#[cfg(test)]
+use util::MemoryStream;
+#[cfg(test)]
+use version::Version;
 
 #[test]
 #[cfg(test)]
@@ -31,7 +31,10 @@ fn get_containers() {
     let response = get_containers_response();
     let _: Vec<Container> = match serde_json::from_str(&response) {
         Ok(body) => body,
-        Err(_) => { assert!(false); return; }
+        Err(_) => {
+            assert!(false);
+            return;
+        }
     };
 }
 
@@ -43,7 +46,10 @@ fn get_stats_single() {
     print!("{}", response);
     let _: Stats = match serde_json::from_str(&response) {
         Ok(body) => body,
-        Err(_) => { assert!(false); return; }
+        Err(_) => {
+            assert!(false);
+            return;
+        }
     };
 }
 
@@ -74,7 +80,10 @@ fn get_system_info() {
     let response = get_system_info_response();
     let _: SystemInfo = match serde_json::from_str(&response) {
         Ok(body) => body,
-        Err(_) => { assert!(false); return; }
+        Err(_) => {
+            assert!(false);
+            return;
+        }
     };
 }
 
@@ -82,7 +91,7 @@ fn get_system_info() {
 #[cfg(test)]
 fn get_images() {
     let response = get_images_response();
-    let images : Vec<Image> = serde_json::from_str(&response).unwrap();
+    let images: Vec<Image> = serde_json::from_str(&response).unwrap();
     assert_eq!(3, images.len());
 }
 
@@ -99,7 +108,10 @@ fn get_processes() {
     let response = get_processes_response();
     let _: Top = match serde_json::from_str(&response) {
         Ok(body) => body,
-        Err(_) => { assert!(false); return; }
+        Err(_) => {
+            assert!(false);
+            return;
+        }
     };
 }
 
@@ -109,17 +121,23 @@ fn get_filesystem_changes() {
     let response = get_filesystem_changes_response();
     let _: Vec<FilesystemChange> = match serde_json::from_str(&response) {
         Ok(body) => body,
-        Err(_) => { assert!(false); return; }
+        Err(_) => {
+            assert!(false);
+            return;
+        }
     };
 }
 
 #[test]
 #[cfg(test)]
-fn get_version(){
+fn get_version() {
     let response = get_version_response();
     let _: Version = match serde_json::from_str(&response) {
         Ok(body) => body,
-        Err(_) => { assert!(false); return; }
+        Err(_) => {
+            assert!(false);
+            return;
+        }
     };
 }
 
@@ -181,10 +199,12 @@ fn get_stats_response() -> String {
 
     let buf = match writer.end() {
         Ok(w) => w,
-        Err(_) => { panic!("error ending writer for stats response"); }
+        Err(_) => {
+            panic!("error ending writer for stats response");
+        }
     };
     let body = String::from_utf8(buf.into_inner()).unwrap();
-    return body
+    return body;
 }
 
 #[cfg(test)]

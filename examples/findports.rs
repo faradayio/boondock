@@ -1,7 +1,7 @@
 extern crate boondock;
 
-use boondock::{ContainerListOptions, Docker};
 use boondock::errors::*;
+use boondock::{ContainerListOptions, Docker};
 use std::io::{self, Write};
 
 fn find_all_exported_ports() -> Result<()> {

@@ -1,9 +1,9 @@
-use std;
-use std::vec::Vec;
-use std::io::{Read, Write, Result};
-use std::time::Duration;
-use std::net::{SocketAddr, Shutdown};
 use hyper::net::NetworkStream;
+use std;
+use std::io::{Read, Result, Write};
+use std::net::{Shutdown, SocketAddr};
+use std::time::Duration;
+use std::vec::Vec;
 
 pub struct MemoryStream {
     buf: Vec<u8>,
@@ -19,7 +19,7 @@ impl MemoryStream {
     }
 
     pub fn into_inner(self) -> Vec<u8> {
-        return self.buf
+        return self.buf;
     }
 }
 
