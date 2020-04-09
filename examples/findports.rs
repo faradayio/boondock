@@ -2,11 +2,11 @@ use boondock::errors::*;
 use boondock::{ContainerListOptions, Docker};
 use std::io::{self, Write};
 
-fn find_all_exported_ports() -> Result<()> {
+async fn find_all_exported_ports() -> Result<()> {
     let docker = Docker::connect_with_defaults()?;
-    let containers = docker.containers(ContainerListOptions::default())?;
+    let containers = docker.containers(ContainerListOptions::default()).await?;
     for container in &containers {
-        let info = docker.container_info(&container)?;
+        let info = docker.container_info(&container).await?;
 
         // Uncomment this to dump everything we know about a container.
         //println!("{:#?}", &info);
@@ -19,11 +19,13 @@ fn find_all_exported_ports() -> Result<()> {
     Ok(())
 }
 
-fn main() {
-    if let Err(err) = find_all_exported_ports() {
-        write!(io::stderr(), "Error: ").unwrap();
+#[tokio::main]
+async fn main() -> Result<()> {
+    if let Err(err) = find_all_exported_ports().await {
+        write!(io::stderr(), "Error: ")?;
         for e in err.iter() {
-            write!(io::stderr(), "{}\n", e).unwrap();
+            write!(io::stderr(), "{}\n", e)?;
         }
     }
+    Ok(())
 }

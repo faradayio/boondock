@@ -1,6 +1,8 @@
-use boondock::Docker;
+use boondock::{errors::Result, Docker};
 
-fn main() {
-    let docker = Docker::connect_with_defaults().unwrap();
-    println!("{:#?}", docker.system_info().unwrap());
+#[tokio::main]
+async fn main() -> Result<()> {
+    let docker = Docker::connect_with_defaults()?;
+    println!("{:#?}", docker.system_info().await?);
+    Ok(())
 }

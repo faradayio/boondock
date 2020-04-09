@@ -1,6 +1,6 @@
 use hyper;
 
-use hyper::client::response::Response;
+use hyper::{Body, Response};
 
 use std::io::{BufRead, BufReader};
 use std::iter;
@@ -10,11 +10,11 @@ use serde_json;
 use crate::errors::*;
 
 pub struct StatsReader {
-    buf: BufReader<Response>,
+    buf: BufReader<Response<Body>>,
 }
 
 impl StatsReader {
-    pub fn new(r: Response) -> StatsReader {
+    pub fn new(r: Response<Body>) -> StatsReader {
         StatsReader {
             buf: BufReader::new(r),
         }
