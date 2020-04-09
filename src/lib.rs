@@ -7,9 +7,6 @@
 #[macro_use]
 extern crate error_chain;
 
-#[cfg(windows)]
-extern crate named_pipe;
-
 #[macro_use]
 extern crate serde_derive;
 
