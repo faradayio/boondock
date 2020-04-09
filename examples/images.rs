@@ -1,8 +1,9 @@
-use boondock::Docker;
+use boondock::{errors::Result, Docker};
 
-fn main() {
-    let docker = Docker::connect_with_defaults().unwrap();
-    let images = docker.images(false).unwrap();
+#[tokio::main]
+async fn main() -> Result<()> {
+    let docker = Docker::connect_with_defaults()?;
+    let images = docker.images(false).await?;
 
     for image in &images {
         println!(
@@ -10,4 +11,5 @@ fn main() {
             image.Id, image.Size, image.VirtualSize, image.Created
         );
     }
+    Ok(())
 }

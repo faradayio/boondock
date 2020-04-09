@@ -1,9 +1,12 @@
-use boondock::{ContainerListOptions, Docker};
+use boondock::{errors::Result, ContainerListOptions, Docker};
 
-fn main() {
-    let docker = Docker::connect_with_defaults().unwrap();
+#[tokio::main]
+async fn main() -> Result<()> {
+    env_logger::init();
+
+    let docker = Docker::connect_with_defaults()?;
     let opts = ContainerListOptions::default().all();
-    let containers = docker.containers(opts).unwrap();
+    let containers = docker.containers(opts).await?;
 
     for container in &containers {
         println!(
@@ -11,4 +14,5 @@ fn main() {
             container.Id, container.Created, container.Image, container.Status
         );
     }
+    Ok(())
 }

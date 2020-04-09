@@ -14,6 +14,7 @@ extern crate named_pipe;
 extern crate serde_derive;
 
 // declare modules
+mod connector;
 pub mod container;
 mod docker;
 pub mod errors;
@@ -21,12 +22,10 @@ pub mod filesystem;
 pub mod image;
 mod options;
 pub mod process;
-pub mod stats;
+//pub mod stats;
 pub mod system;
 mod test;
-#[cfg(unix)]
-mod unix;
-mod util;
+//mod util;
 pub mod version;
 
 // publicly re-export
