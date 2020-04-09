@@ -1,5 +1,3 @@
-
-
 use boondock::{ContainerListOptions, Docker};
 
 fn main() {

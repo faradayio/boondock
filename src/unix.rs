@@ -114,7 +114,12 @@ impl HttpUnixConnector {
 impl NetworkConnector for HttpUnixConnector {
     type Stream = HttpUnixStream;
 
-    fn connect(&self, _host: &str, _port: u16, _scheme: &str) -> hyper::error::Result<HttpUnixStream> {
-        Ok(HttpUnixStream(r#try!(UnixStream::connect(self.path.clone()))))
+    fn connect(
+        &self,
+        _host: &str,
+        _port: u16,
+        _scheme: &str,
+    ) -> hyper::error::Result<HttpUnixStream> {
+        Ok(HttpUnixStream(UnixStream::connect(self.path.clone())?))
     }
 }

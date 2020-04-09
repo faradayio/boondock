@@ -6,9 +6,9 @@ use std::io;
 
 error_chain! {
     foreign_links {
-        env::VarError, EnvVar;
-        hyper::Error, Hyper;
-        io::Error, Io;
+        EnvVar(env::VarError);
+        Hyper(hyper::Error);
+        Io(io::Error);
     }
 
     errors {

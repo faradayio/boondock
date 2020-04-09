@@ -11,6 +11,7 @@ pub struct MemoryStream {
 }
 
 impl MemoryStream {
+    #[cfg(test)]
     pub fn with_input(input: &[u8]) -> MemoryStream {
         MemoryStream {
             buf: input.to_vec(),
@@ -18,6 +19,7 @@ impl MemoryStream {
         }
     }
 
+    #[cfg(test)]
     pub fn into_inner(self) -> Vec<u8> {
         return self.buf;
     }
@@ -26,7 +28,7 @@ impl MemoryStream {
 impl Read for MemoryStream {
     fn read(&mut self, mut buf: &mut [u8]) -> Result<usize> {
         let (_, to_write) = self.buf.split_at(self.pos);
-        let n = r#try!(buf.write(to_write));
+        let n = buf.write(to_write)?;
         self.pos = self.pos + n;
         Ok(n)
     }

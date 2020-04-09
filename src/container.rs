@@ -1,7 +1,6 @@
 use std;
 use std::collections::HashMap;
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(non_snake_case)]
 //Labels, HostConfig

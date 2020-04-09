@@ -1,14 +1,12 @@
-
-
 use boondock::errors::*;
 use boondock::{ContainerListOptions, Docker};
 use std::io::{self, Write};
 
 fn find_all_exported_ports() -> Result<()> {
-    let docker = r#try!(Docker::connect_with_defaults());
-    let containers = r#try!(docker.containers(ContainerListOptions::default()));
+    let docker = Docker::connect_with_defaults()?;
+    let containers = docker.containers(ContainerListOptions::default())?;
     for container in &containers {
-        let info = r#try!(docker.container_info(&container));
+        let info = docker.container_info(&container)?;
 
         // Uncomment this to dump everything we know about a container.
         //println!("{:#?}", &info);
