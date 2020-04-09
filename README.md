@@ -2,57 +2,24 @@
 
 [![Latest version](https://img.shields.io/crates/v/boondock.svg)](https://crates.io/crates/boondock) [![License](https://img.shields.io/crates/l/boondock.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.org/faradayio/boondock.svg?branch=master)](https://travis-ci.org/faradayio/boondock) [![Build status](https://ci.appveyor.com/api/projects/status/yylowaj7rvdy7b9j?svg=true)](https://ci.appveyor.com/project/emk/boondock) [![Documentation](https://img.shields.io/badge/documentation-docs.rs-yellow.svg)](https://docs.rs/boondock/)
 
-**This is a work in progress!**
+**You may not want this library.** This library is only minimally maintained. It is used by the development tool [cage][], and it does not make much effort to support use-cases beyond that.
 
-This is a fork of Graham Lee's highly useful [rust-docker][] library,
-with [hyper][] support from [Toby Lawrence][nuclearfurnace-docker] and
-various other recent patches integrated.
+It does have a very nice async transport layer based on `hyper`, `hyperlocal`, `rustls` and modern async Rust that you might want to borrow for use in your Docker client. No OpenSSL is involved in any way.
 
-It also adds:
+Here are the other Rust Docker clients I know about:
 
-- Partial support for Docker 1.12 (ongoing)
-- Support for Windows (experimental)
-- Support for building without OpenSSL
-- Support for finding and connection to the daemon using the same
-  `DOCKER_HOST`, `DOCKER_CERT_PATH`, etc. variables as the `docker` command
-  line tool
-- Consistent error-handling via [error-chain][]
+- [rust-docker][] is the original Rust Docker library by Graham Lee, which most of the other libraries are based on (including this one).
+- [shiplift][] appears to fairly complete and actively maintained, with lots of downloads. It's still on `hyper` 0.12 at the time of writing.
+- [bollard][] is fully async, and at the time of writing, it was based on a modern `hyper` 0.13.
 
-This library is used by the development tool [cage][] to talk to the Docker
-daemon.  You're welcome to use it for other things, and we're happy to
-accept pull requests!
-
-(Also, the maintainers of [rust-docker][] are totally welcome to use any
-code that they like from this fork.  We're mostly maintaining this as a
-fork so that we can have very quick turnaround times when we need to fix an
-issue with `cage`, and we have no objections to this code being merged back
-upstream.)
-
-[rust-docker]: https://github.com/ghmlee/rust-docker
-[hyper]: http://hyper.rs/
-[nuclearfurnace-docker]: https://github.com/nuclearfurnace/rust-docker
-[error-chain]: https://brson.github.io/error-chain/error_chain/index.html
 [cage]: http://cage.faraday.io/
+[rust-docker]: https://github.com/ghmlee/rust-docker
+[shiplift]: https://docs.rs/shiplift/
+[bollard]: https://crates.io/crates/bollard
 
 ## Examples
 
 For example code, see the [examples directory](./examples).
-
-## OpenSSL
-
-On the Mac, you can set up OpenSSL as follows:
-
-```bash
-brew install openssl
-brew link --force openssl
-
-export OPENSSL_INCLUDE_DIR=/usr/local/opt/openssl/include
-export OPENSSL_ROOT_DIR=/usr/local/opt/openssl
-```
-
-Alternatively, you can build without OpenSSL by passing
-`--no-default-features` to `cargo`, or specifying `default-features =
-false` in a `Cargo.toml` file.
 
 ## Contributing
 
